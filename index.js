@@ -50,7 +50,7 @@ async function run() {
         res.send(result)
         // console.log(result)
     })
-    // books post //
+    // books post /
     app.post('/books', async(req, res)=> {
         const books = req.body;
         const result = await booksCollection.insertOne(books);
