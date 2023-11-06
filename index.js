@@ -2,7 +2,7 @@ const express = require('express');
 const app = express();
 const cors = require('cors');
 require('dotenv').config()
-const { MongoClient, ServerApiVersion } = require('mongodb');
+const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
 const port = process.env.PORT || 5005;
 
 
@@ -29,8 +29,20 @@ async function run() {
     // Connect the client to the server	(optional starting in v4.7)
     // await client.connect();
 
+    const userCollection = client.db('categoryDB').collection('user');
     const categoryCollection = client.db('categoryDB').collection('category');
-    const booksCollection = client.db('categoryDB').collection('allBook')
+    const booksCollection = client.db('categoryDB').collection('allBook');
+
+    // current User
+    app.post('/users', async(req, res)=>{
+        const user = req.body;
+        const result = await userCollection.insertOne(user);
+        res.send(result);
+    }) 
+    app.get('/users', async(req, res)=> {
+        const result = await userCollection.find().toArray();
+        res.send(result);
+    })
 
     // category get
     app.get('/bookCategory', async(req, res)=> {
@@ -40,7 +52,40 @@ async function run() {
     })
     // books post //
     app.post('/books', async(req, res)=> {
-        
+        const books = req.body;
+        const result = await booksCollection.insertOne(books);
+        res.send(result)
+        console.log(result)
+    })
+
+    app.get('/books', async(req, res)=>{
+        const result = await booksCollection.find().toArray();
+        res.send(result);
+    })
+
+    app.get('/books/:id', async(req, res)=>{
+        const id = req.params.id;
+        const query = {_id: new ObjectId(id)};
+        const result = await booksCollection.findOne(query);
+        res.send(result);
+    })
+
+    app.put('/books/:id', async(req, res)=>{
+        const id = req.params.id;
+        const book = req.body;
+        const filter = {_id: new ObjectId(id)};
+        const options = {upsert: true};
+        const updateBook = {
+            $set: {
+                bookPhoto: book.bookPhoto,
+                bookName: book.bookName, 
+                authorName: book.authorName, 
+                rating: book.rating, 
+                category: book.category,
+            }
+        }
+        const result = await booksCollection.updateOne(filter, updateBook, options);
+        res.send(result)
     })
 
     // Send a ping to confirm a successful connection
