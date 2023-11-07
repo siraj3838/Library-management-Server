@@ -32,6 +32,21 @@ async function run() {
     const userCollection = client.db('categoryDB').collection('user');
     const categoryCollection = client.db('categoryDB').collection('category');
     const booksCollection = client.db('categoryDB').collection('allBook');
+    const borrowCollection = client.db('categoryDB').collection('borrow');
+
+    // borrow Collection
+    app.post('/borrows', async(req, res)=>{
+        const book = req.body;
+        const result = await borrowCollection.insertOne(book);
+        res.send(result);
+    })
+
+    app.get('/borrows', async(req, res)=> {
+        const result = await borrowCollection.find().toArray();
+        res.send(result);
+    })
+
+
 
     // current User
     app.post('/users', async(req, res)=>{
@@ -87,6 +102,19 @@ async function run() {
         const result = await booksCollection.updateOne(filter, updateBook, options);
         res.send(result)
     })
+
+    // app.patch('/books', async(req, res)=>{
+    //     const books = req.body;
+    //     const nowQuantity = books.quantity - 1
+    //     const filter = {_id: books._id};
+    //     const updateBooks = {
+    //         $set: {
+    //             quantity: books.nowQuantity
+    //         }
+    //     }
+    //     const result = await booksCollection.updateOne(filter, updateBooks);
+    //     res.send(result);
+    // })
 
     // Send a ping to confirm a successful connection
     await client.db("admin").command({ ping: 1 });
