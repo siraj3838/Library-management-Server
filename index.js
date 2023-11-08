@@ -60,6 +60,7 @@ async function run() {
         const categoryCollection = client.db('categoryDB').collection('category');
         const booksCollection = client.db('categoryDB').collection('allBook');
         const borrowCollection = client.db('categoryDB').collection('borrow');
+        const userFeedbackCollection = client.db('categoryDB').collection('feedback');
 
 
         // jwt related
@@ -81,6 +82,22 @@ async function run() {
             res.clearCookie('token', { maxAge: 0 }).send({ success: true })
         })
 
+        // user feedback collection
+        app.post('/feedbacks', async(req, res)=>{
+            const feedback = req.body;
+            const result = await userFeedbackCollection.insertOne(feedback);
+            res.send(result);
+        })
+        app.get('/feedbacks', async(req, res)=> {
+            const result = await userFeedbackCollection.find().toArray();
+            res.send(result);
+        })
+        app.delete('/feedbacks/:id', async (req, res) => {
+            const id = req.params.id;
+            const query = { _id: new ObjectId(id) };
+            const result = await userFeedbackCollection.deleteOne(query);
+            res.send(result)
+        })
 
         // borrow Collection
         app.post('/borrows', logger, async (req, res) => {
@@ -126,7 +143,7 @@ async function run() {
             console.log(result)
         })
 
-        app.get('/books', logger, verifyToken, async (req, res) => {
+        app.get('/books', logger, async (req, res) => {
             const result = await booksCollection.find().toArray();
             res.send(result);
         })
@@ -166,7 +183,7 @@ async function run() {
         //         }
         //     }
         //     const result = await booksCollection.updateOne(filter, updateBooks);
-        //     res.send(result);
+        //     res.send(result)
         // })
 
         // Send a ping to confirm a successful connection
