@@ -94,7 +94,10 @@ async function run() {
             if(req.user.email !== req.query.email){
                 return res.status(403).send({ massage: 'forbidden' });
             }
-            const result = await borrowCollection.find().toArray();
+            if(req.query?.email){
+                query = {email: req.query.email}
+            }
+            const result = await borrowCollection.find(query).toArray();
             res.send(result);
         })
 
