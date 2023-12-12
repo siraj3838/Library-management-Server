@@ -12,7 +12,9 @@ const port = process.env.PORT || 5005;
 
 app.use(cors({
     origin: [
-        'http://localhost:5173'
+        // 'http://localhost:5173',
+        'https://libary-manage.web.app',
+        'https://libary-manage.firebaseapp.com'
     ],
     credentials: true
 }));
@@ -82,7 +84,7 @@ async function run() {
             res.clearCookie('token', { maxAge: 0 }).send({ success: true })
         })
 
-        // user feedback collection
+        // Our user feedback collection
         app.post('/feedbacks', async(req, res)=>{
             const feedback = req.body;
             const result = await userFeedbackCollection.insertOne(feedback);
@@ -102,6 +104,11 @@ async function run() {
         // borrow Collection
         app.post('/borrows', logger, async (req, res) => {
             const book = req.body;
+            const query = {bookName: book.bookName};
+            const existBook = await borrowCollection.findOne(query);
+            if(existBook){
+                return res.send({message: 'This Book Already select', insertedId: null})
+            }
             const result = await borrowCollection.insertOne(book);
             res.send(result);
         })
